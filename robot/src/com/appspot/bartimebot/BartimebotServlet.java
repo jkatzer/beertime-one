@@ -15,7 +15,8 @@ public class BartimebotServlet extends AbstractRobotServlet
 	private static final int TEMP_THRESHOLD_WARN = 80;
 	private static final int TEMP_THRESHOLD_ACTION = 100;
 
-	private static final String WARN_TEXT = "WARNING: The heat is on.";
+	private static final String TEXT_WARN = "WARNING: The heat is on.";
+	private static final String TEXT_ACTION = "It's time to put this conversation on ice.";
 	private static final String GADGET_ACTION = "http://betagunit.com/joe/bartime_gadget.xml";
 	
 	private static final int INTERVAL_TEMP_REDUCE = 30; // seconds
@@ -80,14 +81,16 @@ public class BartimebotServlet extends AbstractRobotServlet
 			if(temperature >= TEMP_THRESHOLD_WARN && !wavelet.hasDataDocument("warned"))
 			{
 				Blip warnBlip = wavelet.appendBlip();
-				warnBlip.getDocument().append(WARN_TEXT);
+				warnBlip.getDocument().append(TEXT_WARN);
 				wavelet.setDataDocument("warned", "1");
 			}
 			else if(temperature >= TEMP_THRESHOLD_ACTION && !wavelet.hasDataDocument("beertime"))
 			{
-				Blip warnBlip = wavelet.appendBlip();
+				Blip actionTextBlip = wavelet.appendBlip();
+				actionTextBlip.getDocument().append(TEXT_ACTION);
+				Blip gadgetBlip = wavelet.appendBlip();
 				Gadget actionGadget = new Gadget(GADGET_ACTION);
-				warnBlip.getDocument().getGadgetView().append(actionGadget);
+				gadgetBlip.getDocument().getGadgetView().append(actionGadget);
 				wavelet.setDataDocument("beertime", "1");
 			}
 			
