@@ -29,9 +29,18 @@ public class BartimebotServlet extends AbstractRobotServlet
 	public void processEvents(RobotMessageBundle bundle)
 	{
 		Wavelet wavelet = bundle.getWavelet();
-
+		TextView rootDocument = wavelet.getRootBlip().getDocument();
+		GadgetView rootGadgetView = rootDocument.getGadgetView();
+		
 		if (bundle.wasSelfAdded())
 		{
+			// add gauge
+			Gadget gaugeGadget = new Gadget(GADGET_GAUGE);
+			gaugeGadget.setField("temperature", String.valueOf(TEMP_INITIAL));
+			gaugeGadget.setField("maxTemperature", String.valueOf(TEMP_THRESHOLD_ACTION));
+			rootGadgetView.append(gaugeGadget);
+			
+			// put state in wavelet
 			wavelet.setDataDocument("temperature", String.valueOf(TEMP_INITIAL));
 			wavelet.setDataDocument("lastReductionTime", String.valueOf((new Date()).getTime()));
 		}
@@ -80,31 +89,33 @@ public class BartimebotServlet extends AbstractRobotServlet
 			// reload the widget IF temperature has changed 
 			if (temperature != initialTemperature)
 			{
+				
+				rootGadgetView.delete(GADGET_GAUGE);
 				Gadget gaugeGadget = new Gadget(GADGET_GAUGE);
-				gaugeGadget.setProperty("temperature", String.valueOf(temperature));
-				gaugeGadget.setProperty("maxTemperature", String.valueOf(TEMP_THRESHOLD_ACTION));
+				gaugeGadget.setField("temperature", String.valueOf(temperature));
+				gaugeGadget.setField("maxTemperature", String.valueOf(TEMP_THRESHOLD_ACTION));
 				
-				TextView rootDocument = wavelet.getRootBlip().getDocument();
-				GadgetView gadgetView = rootDocument.getGadgetView();
+				rootGadgetView.append(gaugeGadget);
 				
-				if(gadgetView == null)
-					rootDocument.appendElement(gaugeGadget);
-				else 
-				{
-					Gadget currentG = null;
-					try{
-						currentG = gadgetView.getGadget(GADGET_GAUGE);
-
-						if(currentG == null)
-							gadgetView.append(gaugeGadget);
-
-						else
-							gadgetView.replace(gaugeGadget);
-					}
-					catch(NullPointerException e) {
-						LOG.warning("We hit an NPE bug in Wave.  Did not redeploy gadget.");
-					}
-				}
+				
+//				if(gadgetView == null)
+//					rootDocument.appendElement(gaugeGadget);
+//				else 
+//				{
+//					Gadget currentG = null;
+//					try{
+//						currentG = gadgetView.getGadget(GADGET_GAUGE);
+//
+//						if(currentG == null)
+//							gadgetView.append(gaugeGadget);
+//
+//						else
+//							gadgetView.replace(gaugeGadget);
+//					}
+//					catch(NullPointerException e) {
+//						LOG.warning("We hit an NPE bug in Wave.  Did not redeploy gadget.");
+//					}
+//				}
 			}
 			
 			// Action!
