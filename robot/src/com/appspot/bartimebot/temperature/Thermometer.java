@@ -8,15 +8,28 @@ public class Thermometer
 {
 	final static Logger LOG = Logger.getLogger(Thermometer.class.getName());
 
-	public static int getTemperatureDifference(String blipContent)
+	public static int getTemperatureDifference(String blipText)
+	{
+		return getTemperatureDifference(blipText, 1);
+	}
+	
+	public static int getTemperatureDifference(String blipText, int weight)
 	{
 		int result = 0;
 		
-		for (String word : Arrays.asList(blipContent.split("\\s")))
+		for (String word : Arrays.asList(blipText.split("\\s")))
 		{
+			weight = 1;
+			
+			String blipTextFiltered = blipText.replaceAll("!", "");
+			if(!blipText.equals(blipTextFiltered))
+				weight *= 2;
+			
+			blipTextFiltered = blipText.replaceAll("[^a-zA-Z]", "");
+			
 			if (WORDS.contains(word.toLowerCase()))
 			{
-				result += 1.0;
+				result += weight;
 				LOG.warning("Found: " + word);
 			}
 		}
