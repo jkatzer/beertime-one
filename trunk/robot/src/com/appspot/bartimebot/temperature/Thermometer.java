@@ -307,7 +307,12 @@ public class Thermometer
 			"drink",
 			"stupid",
 			"dumb",
-			
+			"dumbass",
+			"jerk",
+			"retard",
+			"noob",
+			"n00b",
+			"stfu",
 			"segfault",
 			"npe",
 			"null",
