@@ -1,0 +1,11 @@
+<extension name="BarTime!"
+	description="google wave robot that hijacks a wave when it's time for a drink irl"
+	thumbnailUrl="http://bartimebot.appspot.com/favicon.ico"
+	version="5">
+	<author name="Joe" email="joe@mulvaney.me.uk"/>
+	<menuHook location="NEW_WAVE_MENU" text="New BarTime wave">
+		<createNewWave>
+			<participant id="bartimebot@appspot.com"/>
+		</createNewWave>
+	</menuHook>
+</extension>
