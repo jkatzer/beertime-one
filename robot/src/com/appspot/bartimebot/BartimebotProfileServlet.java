@@ -12,7 +12,7 @@ public class BartimebotProfileServlet extends ProfileServlet
 	@Override
 	public String getRobotAvatarUrl()
 	{
-		return "http://bartimebot.appspot.com/favicon.ico";
+		return "http://bartimebot.appspot.com/avatar.jpg";
 	}
 
 	@Override

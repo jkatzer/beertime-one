@@ -16,22 +16,35 @@ public class Thermometer
 	public static int getTemperatureDifference(String blipText, int defaultWeight)
 	{
 		int result = 0;
-		int weight = 1;
+		int weight = defaultWeight;
+		
+		String wordFiltered;
 		
 		for (String word : Arrays.asList(blipText.split("\\s")))
 		{
+			// reset weight
 			weight = defaultWeight;
 			
-			String blipTextFiltered = blipText.replaceAll("!", "");
-			if(!blipText.equals(blipTextFiltered))
+			// if there's a ! in the word, double the weight
+			wordFiltered = word.replaceAll("!", "");
+			if(!word.equals(wordFiltered))
 				weight *= 2;
 			
-			blipTextFiltered = blipText.replaceAll("[^a-zA-Z]", "");
-			
+			// look up the word in the list
 			if (WORDS.contains(word.toLowerCase()))
 			{
 				result += weight;
 				LOG.warning("Found: " + word);
+			}
+
+			// remove all the symbols from the word
+			wordFiltered = word.replaceAll("[^a-zA-Z0-9]", "");
+			
+			// if the word has changed, look it up again
+			if (!word.equals(wordFiltered) && WORDS.contains(wordFiltered.toLowerCase()))
+			{
+				result += weight;
+				LOG.warning("Found: " + wordFiltered);
 			}
 		}
 		
@@ -292,6 +305,9 @@ public class Thermometer
 			"beer",
 			"beers",
 			"drink",
+			"stupid",
+			"dumb",
+			
 			"segfault",
 			"npe",
 			"null",

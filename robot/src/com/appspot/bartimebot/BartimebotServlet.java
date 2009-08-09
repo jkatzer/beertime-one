@@ -19,56 +19,50 @@ public class BartimebotServlet extends AbstractRobotServlet
 	private static final String GADGET_ACTION = "http://betagunit.com/joe/bartime_gadget.xml";
 	
 	private static final int INTERVAL_TEMP_REDUCE = 30; // seconds
-	private static final int TEMP_REDUCE_AMOUNT = 1;
+	private static final int TEMP_REDUCE_AMOUNT = 2;
 
-	private static final String GADGET_GAUGE = "http://betagunit.com/joe/temperature.xml";
-	
 	final static Logger LOG = Logger.getLogger(BartimebotServlet.class.getName());
 
 	@Override
 	public void processEvents(RobotMessageBundle bundle)
 	{
 		Wavelet wavelet = bundle.getWavelet();
-		TextView rootDocument = wavelet.getRootBlip().getDocument();
-		GadgetView rootGadgetView = rootDocument.getGadgetView();
 		
 		if (bundle.wasSelfAdded())
 		{
-			// add gauge
-			Gadget gaugeGadget = new Gadget(GADGET_GAUGE);
-			gaugeGadget.setField("temperature", String.valueOf(TEMP_INITIAL));
-			gaugeGadget.setField("maxTemperature", String.valueOf(TEMP_THRESHOLD_ACTION));
-			rootGadgetView.append(gaugeGadget);
-			
 			// put state in wavelet
 			wavelet.setDataDocument("temperature", String.valueOf(TEMP_INITIAL));
 			wavelet.setDataDocument("lastReductionTime", String.valueOf((new Date()).getTime()));
 		}
-
+		
 		for (Event event : bundle.getBlipSubmittedEvents())
 		{
 			Blip blip = event.getBlip();
 			String blipText = blip.getDocument().getText();
-			
-			if(blipText.startsWith("/temp"))
-			{
-				blip.getDocument().replace(new Range(0, 5), "Temperature: " + wavelet.getDataDocument("temperature") + "\n");
-			}
 			
 			final int initialTemperature = Integer.parseInt(wavelet.getDataDocument("temperature"));
 			int temperature = initialTemperature;
 			
 			// periodic temperature decrease
 			long lastReductionTimestamp = Long.parseLong(wavelet.getDataDocument("lastReductionTime"));
-			long currentTimestamp = (new Date()).getTime();	// milliseconds
-			long timeDifference = (currentTimestamp - lastReductionTimestamp) / 1000;	// seconds
+			long currentTimestamp = (new Date()).getTime(); // milliseconds
+			int timeDifference = (int) ((currentTimestamp - lastReductionTimestamp) / 1000); // seconds
 			while (timeDifference >= INTERVAL_TEMP_REDUCE)
 			{
 				temperature -= TEMP_REDUCE_AMOUNT;
-				LOG.warning("Temperature reduced by " + TEMP_REDUCE_AMOUNT);
-				LOG.info("Calculated time difference (seconds): " + timeDifference);
 				timeDifference -= INTERVAL_TEMP_REDUCE;
+				lastReductionTimestamp += (INTERVAL_TEMP_REDUCE * 1000);
+				wavelet.setDataDocument("lastReductionTime", String.valueOf(lastReductionTimestamp));
+				
+				LOG.info("Temperature reduced by " + TEMP_REDUCE_AMOUNT);
+				// LOG.info("Current Timestamp (ms): " + currentTimestamp);
+				// LOG.info("Last reduction Timestamp (ms): " + lastReductionTimestamp);
+				LOG.info("Calculated time difference (seconds): " + timeDifference);
+				// LOG.info("Expected time difference (ms): " + (currentTimestamp - lastReductionTimestamp));
 			}
+			
+			// ensuring lower bound
+			temperature = Math.max(temperature, 0);
 			
 			// temperature increase
 			temperature += Thermometer.getTemperatureDifference(blipText, TEMP_BASIC_INCREMENT);
@@ -77,46 +71,10 @@ public class BartimebotServlet extends AbstractRobotServlet
 			// ensuring upper bound
 			temperature = Math.min(temperature, initialTemperature + (TEMP_THRESHOLD_ACTION / 4));
 			
-			// ensuring lower bound
-			temperature = Math.max(temperature, 0);
-			
 			LOG.warning("Conversation temperature: " + temperature);
-
 
 			// store the final temperature
 			wavelet.setDataDocument("temperature", "" + temperature);
-			
-			// reload the widget IF temperature has changed 
-			if (temperature != initialTemperature)
-			{
-				
-				rootGadgetView.delete(GADGET_GAUGE);
-				Gadget gaugeGadget = new Gadget(GADGET_GAUGE);
-				gaugeGadget.setField("temperature", String.valueOf(temperature));
-				gaugeGadget.setField("maxTemperature", String.valueOf(TEMP_THRESHOLD_ACTION));
-				
-				rootGadgetView.append(gaugeGadget);
-				
-				
-//				if(gadgetView == null)
-//					rootDocument.appendElement(gaugeGadget);
-//				else 
-//				{
-//					Gadget currentG = null;
-//					try{
-//						currentG = gadgetView.getGadget(GADGET_GAUGE);
-//
-//						if(currentG == null)
-//							gadgetView.append(gaugeGadget);
-//
-//						else
-//							gadgetView.replace(gaugeGadget);
-//					}
-//					catch(NullPointerException e) {
-//						LOG.warning("We hit an NPE bug in Wave.  Did not redeploy gadget.");
-//					}
-//				}
-			}
 			
 			// Action!
 			if(temperature >= TEMP_THRESHOLD_WARN && !wavelet.hasDataDocument("warned"))
@@ -131,6 +89,19 @@ public class BartimebotServlet extends AbstractRobotServlet
 				Gadget actionGadget = new Gadget(GADGET_ACTION);
 				warnBlip.getDocument().getGadgetView().append(actionGadget);
 				wavelet.setDataDocument("beertime", "1");
+			}
+			
+			// process special switches
+			if(blipText.startsWith("/temp"))
+			{
+				blip.getDocument().replace(new Range(0, 5), "Temperature: " + wavelet.getDataDocument("temperature") + "\n");
+			}
+			
+			if(blipText.startsWith("/reset"))
+			{
+				wavelet.setDataDocument("temperature", "0");
+				blip.getDocument().replace(new Range(0, 6), "Temperature: " + wavelet.getDataDocument("temperature") + "\n");
+				LOG.warning("Conversation temperature has been reset.");
 			}
 		}
 	}
