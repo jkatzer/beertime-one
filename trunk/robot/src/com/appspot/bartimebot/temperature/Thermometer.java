@@ -13,13 +13,14 @@ public class Thermometer
 		return getTemperatureDifference(blipText, 1);
 	}
 	
-	public static int getTemperatureDifference(String blipText, int weight)
+	public static int getTemperatureDifference(String blipText, int defaultWeight)
 	{
 		int result = 0;
+		int weight = 1;
 		
 		for (String word : Arrays.asList(blipText.split("\\s")))
 		{
-			weight = 1;
+			weight = defaultWeight;
 			
 			String blipTextFiltered = blipText.replaceAll("!", "");
 			if(!blipText.equals(blipTextFiltered))
