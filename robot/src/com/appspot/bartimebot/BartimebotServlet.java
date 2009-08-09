@@ -21,7 +21,7 @@ public class BartimebotServlet extends AbstractRobotServlet
 	private static final int INTERVAL_TEMP_REDUCE = 30; // seconds
 	private static final int TEMP_REDUCE_AMOUNT = 1;
 
-	private static final String GADGET_GAUGE = "http://betagunit.com/temperature.xml";
+	private static final String GADGET_GAUGE = "http://betagunit.com/joe/temperature.xml";
 	
 	final static Logger LOG = Logger.getLogger(BartimebotServlet.class.getName());
 
@@ -73,6 +73,10 @@ public class BartimebotServlet extends AbstractRobotServlet
 			
 			LOG.warning("Conversation temperature: " + temperature);
 
+
+			// store the final temperature
+			wavelet.setDataDocument("temperature", "" + temperature);
+			
 			// reload the widget IF temperature has changed 
 			if (temperature != initialTemperature)
 			{
@@ -85,14 +89,23 @@ public class BartimebotServlet extends AbstractRobotServlet
 				
 				if(gadgetView == null)
 					rootDocument.appendElement(gaugeGadget);
-				else if(gadgetView.getGadget(GADGET_GAUGE) == null)
-					gadgetView.append(gaugeGadget);
-				else
-					gadgetView.replace(gaugeGadget);
-			}
+				else 
+				{
+					Gadget currentG = null;
+					try{
+						currentG = gadgetView.getGadget(GADGET_GAUGE);
 
-			// store the final temperature
-			wavelet.setDataDocument("temperature", "" + temperature);
+						if(currentG == null)
+							gadgetView.append(gaugeGadget);
+
+						else
+							gadgetView.replace(gaugeGadget);
+					}
+					catch(NullPointerException e) {
+						LOG.warning("We hit an NPE bug in Wave.  Did not redeploy gadget.");
+					}
+				}
+			}
 			
 			// Action!
 			if(temperature >= TEMP_THRESHOLD_WARN && !wavelet.hasDataDocument("warned"))
