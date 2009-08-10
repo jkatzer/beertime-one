@@ -30,6 +30,9 @@ public class Thermometer
 			if(!word.equals(wordFiltered))
 				weight *= 2;
 			
+			if(word.toUpperCase().equals(word))
+				result += weight / 2;
+			
 			// look up the word in the list
 			if (WORDS.contains(word.toLowerCase()))
 			{
