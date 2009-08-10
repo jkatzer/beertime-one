@@ -16,7 +16,7 @@ public class BartimebotServlet extends AbstractRobotServlet
 	private static final int TEMP_THRESHOLD_ACTION = 100;
 
 	private static final String TEXT_WARN = "WARNING: The heat is on.";
-	private static final String TEXT_ACTION = "It's time to put this conversation on ice.";
+	private static final String TEXT_ACTION = "It's time to put this conversation on ice. Where do u wanna hang out?";
 	private static final String GADGET_ACTION = "http://betagunit.com/joe/bartime_gadget.xml";
 	
 	private static final int INTERVAL_TEMP_REDUCE = 30; // seconds
@@ -97,13 +97,15 @@ public class BartimebotServlet extends AbstractRobotServlet
 			// process special switches
 			if(blipText.startsWith("/temp"))
 			{
-				blip.getDocument().replace(new Range(0, 5), "Temperature: " + wavelet.getDataDocument("temperature") + "\n");
+				Blip replyBlip = blip.createChild(); 
+				replyBlip.getDocument().append("Conversation Temperature: " + wavelet.getDataDocument("temperature"));
 			}
 			
 			if(blipText.startsWith("/reset"))
 			{
 				wavelet.setDataDocument("temperature", "0");
-				blip.getDocument().replace(new Range(0, 6), "Temperature: " + wavelet.getDataDocument("temperature") + "\n");
+				Blip replyBlip = blip.createChild();
+				replyBlip.getDocument().append("Conversation has been iced.");
 				LOG.warning("Conversation temperature has been reset.");
 			}
 		}
