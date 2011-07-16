@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+  <ModulePrefs title="Hello Wave">
+    <Require feature="wave-preview" /> 
+  <Require feature="opensocial-templates"/>
+  <Require feature="opensocial-data"/>
+  <Require feature="dynamic-height"/>
+    <Require feature="setprefs" />
+  </ModulePrefs>
+  <UserPref name="lat" default_value="34" datatype="hidden" />
+  <UserPref name="lng" default_value="-118" datatype="hidden" />
+  <UserPref name="latlng" default_value="34,-118"
+    datatype="hidden" />
+  <UserPref name="zoom" default_value="4" datatype="hidden" />
+  <UserPref name="type" default_value="MAP" datatype="hidden" />
+  <Content type="html">
+    <![CDATA[     
+
+  <script type="text/javascript" src="http://wave-api.appspot.com/public/wave.js"></script>
+
+	<script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAh5bodR5-STTy5fBNr5l0nBScWggaqrJP-WiFRNzsCA1S2Q4oZRRgL2lA44GKUidQL_HxBX-7P9T0OQ&sensor=false" type="text/javascript"> </script>
+
+	<script type="text/javascript" src="http://betagunit.com/jquery.js"></script>  
+	<script type="text/javascript" src="http://betagunit.com/joe/bartime_script.js"></script>
+	<script type="text/javascript" src="http://betagunit.com/joe/bartime_yelp.js"></script>
+	
+
+<link rel="stylesheet" href="http://betagunit.com/bartime_style.css" type="text/css" />  
+
+
+
+<script type="text/os-template" name="answers-template"
+     require="dont_auto_render">
+   <table class="answer-table">
+     <thead>
+       <tr>
+         <td class="no" onclick="onAnswer(ANSWER_Yes)">
+           <div id="voteTableCol0">1</div>
+         </td>
+         <td class="no" onclick="onAnswer(ANSWER_No)">
+           <div id="voteTableCol1">2</div>
+         </td>
+         <td class="no" onclick="onAnswer(ANSWER_Maybe)">
+           <div id="voteTableCol2">3</div>
+         </td>
+       </tr>
+     </thead>
+     <tbody>
+       <tr if="total gt 0">
+         <td align="center" valign="top" class="no">
+           <div repeat="y">
+             <table><tr><td align="center">
+               <os:showParticipant person="${Cur}"/>
+             </td></tr></table>
+           </div>
+         </td>
+         <td align="center" valign="top" class="no">
+           <div repeat="n">
+             <table><tr><td align="center">
+               <os:showParticipant person="${Cur}"/>
+             </td></tr></table>
+           </div>
+         </td>
+         <td align="center" valign="top" class="no">
+           <div repeat="m">
+             <table><tr><td align="center">
+               <os:showParticipant person="${Cur}"/>
+             </td></tr></table>
+           </div>
+         </td>
+       </tr>
+       <tr>
+         <td class="summary" valign="top" align="center">
+           <img class="smiley" src="http://wave-api.appspot.com/public/gadgets/areyouin/yes.png"/>
+           ${y.length}
+         </td>
+         <td class="summary" valign="top" align="center">
+           <img class="smiley" src="http://wave-api.appspot.com/public/gadgets/areyouin/no.png"/>
+           ${n.length}
+         </td>
+         <td class="summary" valign="top" align="center"><img class="smiley" src="http://wave-api.appspot.com/public/gadgets/areyouin/maybe.png"/>
+           ${m.length}
+         </td>
+       </tr>
+       <tr if="total gt 0">
+         <td></td>
+         <td></td>
+         <td align="right" valign="top">
+           <div if="!responded" class="summary">
+             You have not yet responded.
+           </div>
+         </td>
+       </tr>
+     </tbody>
+   </table>
+ </script>
+
+ <script type="text/os-template" tag="os:showParticipant">
+   <div class="participant">
+     <img width="24" height="24" src="${My.person.icon}"/>
+     <div class="name">${My.person.displayName}</div>
+     <div class="msg">${My.person.status}</div>
+   </div>
+ </script>
+
+ <div id="container">
+	<div id="map_canvas" style="width: 100%; height: 300px"></div>
+	<div id="mouseover" class="mouseovered" style="width: 100%; height: 40px; font-size: 24px; font-weight: bold; text-align: center;"></div>
+   <div id="answer-table"></div>
+   <table><tr><td align="right"><div class="top">
+     <a href="#" id="status-link">Set my status</div>
+     <div id="status-div">
+       <form action="" id="status-form">
+         <input id="status-box" type="text" size="20"/>
+         <input id="status-submit" type="submit" value="Set"/>
+       </form>
+     </div>
+   </div></td></tr></table>
+
+ </div>
+
+
+    ]]>
+  </Content>
+</Module>
+
+
+
